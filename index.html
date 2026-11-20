@@ -185,25 +185,12 @@
     <div id="map"></div>
     <div id="googleMapsKeyNotice" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-slate-900/40 p-4">
       <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl">
-        <h2 class="text-base font-bold text-slate-800">Hubungkan Google Maps</h2>
+        <h2 class="text-base font-bold text-slate-800">Status Google Maps</h2>
         <p id="googleMapsKeyMessage" class="mt-2 text-sm text-slate-600">
-          Masukkan Google Maps API key Anda. Key hanya disimpan di sesi browser ini, tidak di dalam file.
+          Memuat Google Maps...
         </p>
-        <form id="googleMapsKeyForm" class="mt-4 space-y-3">
-          <input
-            id="googleMapsKeyInput"
-            type="password"
-            required
-            autocomplete="off"
-            placeholder="Google Maps API key"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-          />
-          <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-            Muat Google Maps
-          </button>
-        </form>
         <p class="mt-3 text-xs text-slate-500">
-          Aktifkan Maps JavaScript API dan billing di
+          Jika muncul error autentikasi, pastikan Maps JavaScript API aktif dan billing tersedia di
           <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google Cloud Console</a>.
         </p>
       </div>
@@ -378,12 +365,12 @@
       let activeCategoryFilter = 'all';
       let searchQuery = '';
       let tempClickMarker = null;
-      let currentPhotoBase64 = ''; // Menyimpan foto sementara di modal (opsional)
+      let currentPhotoBase64 = '';
 
       // ==========================================
       // INISIALISASI GOOGLE MAPS
       // ==========================================
-      const defaultCenter = [-3.3186, 114.5944]; // Banjarmasin / Indonesia
+      const defaultCenter = [-3.3186, 114.5944];
       const map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: defaultCenter[0], lng: defaultCenter[1] },
         zoom: 13,
@@ -1016,11 +1003,10 @@
       renderAll();
     };
 
+    // API Key otomatis dimuat saat halaman dibuka
+    const GOOGLE_MAPS_API_KEY = 'AIzaSyAWZ3tvL2nBqWWzwQzZcXbsFZUWIZSCzZI';
     const googleMapsKeyNotice = document.getElementById('googleMapsKeyNotice');
     const googleMapsKeyMessage = document.getElementById('googleMapsKeyMessage');
-    const googleMapsKeyForm = document.getElementById('googleMapsKeyForm');
-    const googleMapsKeyInput = document.getElementById('googleMapsKeyInput');
-    const GOOGLE_MAPS_KEY_STORAGE = 'petaku_google_maps_api_key';
 
     function showGoogleMapsKeyNotice(message) {
       if (message) googleMapsKeyMessage.textContent = message;
@@ -1038,26 +1024,10 @@
     }
 
     window.gm_authFailure = () => {
-      sessionStorage.removeItem(GOOGLE_MAPS_KEY_STORAGE);
       showGoogleMapsKeyNotice('Google menolak API key. Pastikan Maps JavaScript API aktif, billing tersedia, dan pembatasan key mengizinkan situs ini.');
     };
 
-    googleMapsKeyForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const apiKey = googleMapsKeyInput.value.trim();
-      if (!apiKey) return;
-      sessionStorage.setItem(GOOGLE_MAPS_KEY_STORAGE, apiKey);
-      googleMapsKeyInput.value = '';
-      googleMapsKeyNotice.classList.add('hidden');
-      loadGoogleMaps(apiKey);
-    });
-
-    const savedGoogleMapsKey = sessionStorage.getItem(GOOGLE_MAPS_KEY_STORAGE);
-    if (savedGoogleMapsKey) {
-      loadGoogleMaps(savedGoogleMapsKey);
-    } else {
-      showGoogleMapsKeyNotice();
-    }
+    loadGoogleMaps(GOOGLE_MAPS_API_KEY);
   </script>
 </body>
 </html>
