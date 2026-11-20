@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PetaKu - Penanda Titik Peta Lokal</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col md:flex-row h-screen w-screen">
+
+  <!-- SIDEBAR PANEL -->
+  <aside id="sidebar" class="w-full md:w-96 h-[45vh] md:h-full bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col z-20 shadow-lg shrink-0">
+    <!-- Header -->
+    <div class="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-base leading-tight tracking-tight">PetaKu</h1>
+          <p class="text-[11px] text-blue-100">Penanda Lokasi Lokal (JSON)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="markerCountBadge" class="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+          0 Titik
+        </span>
+        <button id="mobilePanelToggle" type="button" aria-expanded="true" aria-label="Ciutkan daftar titik"
+          class="hidden mobile-panel-toggle bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-2 rounded-lg">
+          Sembunyikan
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="p-3 border-b border-slate-100 space-y-2.5 bg-slate-50/70 shrink-0">
+      <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          id="filterInput"
+          placeholder="Cari nama titik atau catatan..."
+          class="w-full pl-9 pr-3 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition"
+        />
+      </div>
+
+      <!-- Filter Kategori -->
+      <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-xs" id="categoryFilterContainer">
+        <button data-cat="all" class="cat-filter-btn active px-2.5 py-1 rounded-full font-medium bg-blue-600 text-white transition shrink-0">Semua</button>
+        <button data-cat="Umum" class="cat-filter-btn px-2.5 py-1 rounded-full font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition shrink-0 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>Umum
+        </button>
+        <button data-cat="Kuliner" class="cat-filter-btn px-2.5 py-1 rounded-full font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition shrink-0 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-orange-500"></span>Kuliner
+        </button>
+        <button data-cat="Wisata" class="cat-filter-btn px-2.5 py-1 rounded-full font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition shrink-0 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>Wisata
+        </button>
+        <button data-cat="Penting" class="cat-filter-btn px-2.5 py-1 rounded-full font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition shrink-0 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-rose-500"></span>Penting
+        </button>
+        <button data-cat="Bisnis" class="cat-filter-btn px-2.5 py-1 rounded-full font-medium bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition shrink-0 flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-purple-500"></span>Bisnis
+        </button>
+      </div>
+    </div>
+
+    <!-- Daftar Titik -->
+    <div id="markerList" class="flex-1 overflow-y-auto p-3 space-y-2.5"></div>
+
+    <!-- Footer Actions (Export / Import / Clear) -->
+    <div class="p-3 border-t border-slate-200 bg-slate-50 space-y-2 shrink-0">
+      <div class="grid grid-cols-2 gap-2">
+        <button id="exportBtn" class="flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Ekspor JSON
+        </button>
+        <label class="flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition shadow-sm cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          Impor JSON
+          <input type="file" id="importInput" accept=".json" class="hidden" />
+        </label>
+      </div>
+      <button id="clearAllBtn" class="w-full py-1.5 text-[11px] font-medium text-rose-600 hover:bg-rose-50 rounded-md transition flex items-center justify-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Hapus Semua Data Lokal
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAP CONTAINER -->
+  <main class="relative flex-1 h-[55vh] md:h-full w-full">
+    <!-- Floating Search Bar di atas Peta -->
+    <div class="absolute top-3 left-3 right-14 md:left-4 md:right-auto md:w-96 z-10 pointer-events-auto">
+      <form id="geoSearchForm" class="flex items-center bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200/80 overflow-hidden">
+        <div class="pl-3 text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="geoSearchInput"
+          placeholder="Cari kota, alamat, atau lat, lng..."
+          class="w-full px-2.5 py-2.5 text-xs md:text-sm bg-transparent focus:outline-none text-slate-700"
+        />
+        <button type="submit" id="geoSearchBtn" class="px-3.5 py-1.5 mr-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition shrink-0">
+          Cari
+        </button>
+      </form>
+    </div>
+
+    <!-- Floating Instruction Pill -->
+    <div class="hidden sm:flex items-center gap-2 absolute bottom-5 left-1/2 -translate-x-1/2 z-10 bg-slate-900/85 text-white text-xs px-4 py-2 rounded-full shadow-lg backdrop-blur-sm pointer-events-none">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      Klik di mana saja pada peta untuk menandai titik baru
+    </div>
+
+    <!-- Floating Action Buttons (Lokasi Saya & Tambah Manual) -->
+    <div class="absolute bottom-6 right-3 md:right-4 z-10 flex flex-col gap-2">
+      <button id="locateMeBtn" title="Lokasi Saya Saat Ini" class="p-3 bg-white hover:bg-slate-50 text-slate-700 rounded-full shadow-lg border border-slate-200 transition flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <circle cx="12" cy="12" r="3" stroke-width="2" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v3m0 14v3m10-10h-3M5 12H2" />
+        </svg>
+      </button>
+      <button id="addCenterBtn" title="Tandai Titik Tengah Peta" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Div Peta Google Maps -->
+    <div id="map"></div>
+    <div id="googleMapsKeyNotice" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-slate-900/40 p-4">
+      <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl">
+        <h2 class="text-base font-bold text-slate-800">Status Google Maps</h2>
+        <p id="googleMapsKeyMessage" class="mt-2 text-sm text-slate-600">
+          Memuat Google Maps...
+        </p>
+        <p class="mt-3 text-xs text-slate-500">
+          Jika muncul error autentikasi, pastikan Maps JavaScript API aktif dan billing tersedia di
+          <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google Cloud Console</a>.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL FORM TAMBAH / EDIT TITIK -->
+  <div id="markerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 max-h-[92vh] flex flex-col">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <h2 id="modalTitle" class="font-bold text-slate-800 text-base">Tambah Titik Lokasi</h2>
+        <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="markerForm" class="p-5 space-y-4 overflow-y-auto">
+        <input type="hidden" id="editMarkerId" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lokasi / Judul <span class="text-rose-500">*</span></label>
+          <input
+            type="text"
+            id="pointName"
+            required
+            placeholder="Contoh: Kantor Pusat, Kedai Kopi, Rumah..."
+            class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori & Warna Pin</label>
+          <div class="grid grid-cols-5 gap-2" id="categorySelector">
+            <label class="cursor-pointer">
+              <input type="radio" name="pointCategory" value="Umum" class="peer sr-only" checked />
+              <div class="flex flex-col items-center p-2 rounded-xl border border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50/70 transition">
+                <span class="w-4 h-4 rounded-full bg-blue-500 mb-1 shadow-xs"></span>
+                <span class="text-[11px] font-medium text-slate-700">Umum</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="pointCategory" value="Kuliner" class="peer sr-only" />
+              <div class="flex flex-col items-center p-2 rounded-xl border border-slate-200 peer-checked:border-orange-500 peer-checked:bg-orange-50/70 transition">
+                <span class="w-4 h-4 rounded-full bg-orange-500 mb-1 shadow-xs"></span>
+                <span class="text-[11px] font-medium text-slate-700">Kuliner</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="pointCategory" value="Wisata" class="peer sr-only" />
+              <div class="flex flex-col items-center p-2 rounded-xl border border-slate-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 transition">
+                <span class="w-4 h-4 rounded-full bg-emerald-500 mb-1 shadow-xs"></span>
+                <span class="text-[11px] font-medium text-slate-700">Wisata</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="pointCategory" value="Penting" class="peer sr-only" />
+              <div class="flex flex-col items-center p-2 rounded-xl border border-slate-200 peer-checked:border-rose-500 peer-checked:bg-rose-50/70 transition">
+                <span class="w-4 h-4 rounded-full bg-rose-500 mb-1 shadow-xs"></span>
+                <span class="text-[11px] font-medium text-slate-700">Penting</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="pointCategory" value="Bisnis" class="peer sr-only" />
+              <div class="flex flex-col items-center p-2 rounded-xl border border-slate-200 peer-checked:border-purple-500 peer-checked:bg-purple-50/70 transition">
+                <span class="w-4 h-4 rounded-full bg-purple-500 mb-1 shadow-xs"></span>
+                <span class="text-[11px] font-medium text-slate-700">Bisnis</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Latitude</label>
+            <input
+              type="number"
+              step="any"
+              id="pointLat"
+              required
+              class="w-full px-3 py-1.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Longitude</label>
+            <input
+              type="number"
+              step="any"
+              id="pointLng"
+              required
+              class="w-full px-3 py-1.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- INPUT FOTO (OPSIONAL / TIDAK WAJIB) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">
+            Foto Lokasi <span class="font-normal text-slate-400">(Opsional)</span>
+          </label>
+          <div id="photoUploadBox" class="border border-dashed border-slate-300 rounded-xl p-3 bg-slate-50/70 hover:bg-slate-100/70 transition text-center cursor-pointer relative">
+            <input type="file" id="pointPhotoInput" accept="image/*" class="hidden" />
+            <div id="photoPlaceholder" class="flex flex-col items-center justify-center py-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="text-xs font-medium text-slate-600">Klik untuk pilih foto</span>
+              <span class="text-[10px] text-slate-400 mt-0.5">JPG, PNG, atau WebP (otomatis dikompresi)</span>
+            </div>
+
+            <!-- Pratinjau Foto -->
+            <div id="photoPreviewWrapper" class="hidden relative">
+              <img id="photoPreviewImg" src="" alt="Pratinjau Foto" class="w-full h-36 object-cover rounded-lg border border-slate-200" />
+              <button type="button" id="removePhotoBtn" title="Hapus Foto" class="absolute top-2 right-2 bg-slate-900/75 hover:bg-rose-600 text-white text-[11px] font-medium px-2.5 py-1 rounded-lg shadow transition flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Deskripsi</label>
+          <textarea
+            id="pointDesc"
+            rows="3"
+            placeholder="Tambahkan alamat lengkap, jam buka, atau keterangan lainnya..."
+            class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none"
+          ></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" id="cancelModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm transition">
+            Simpan Titik
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-16 right-4 z-50 transform translate-x-full opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="toastContent" class="bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2">
+      <span id="toastIcon"></span>
+      <span id="toastMessage">Notifikasi</span>
+    </div>
+  </div>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+      cursor: crosshair;
+    }
+
+    /* Custom scrollbar untuk sidebar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Styling InfoWindow Google Maps */
+    .gm-style .gm-style-iw-c {
+      border-radius: 14px !important;
+      padding: 0 !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+    }
+    .gm-style .gm-style-iw-d {
+      overflow: hidden !important;
+    }
+
+
+/* Layout responsif untuk perangkat mobile */
+html, body {
+  min-height: 100%;
+  height: 100%;
+}
+body {
+  min-height: 100dvh;
+}
+#map {
+  min-height: 100%;
+}
+@media (max-width: 767px) {
+  body {
+    display: block !important;
+    height: 100dvh !important;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 48dvh !important;
+    max-height: 78dvh;
+    border-radius: 20px 20px 0 0;
+    border: 1px solid #e2e8f0;
+    border-bottom: 0;
+    overflow: hidden;
+    transition: height 220ms ease, transform 220ms ease;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #sidebar.mobile-collapsed {
+    height: 76px !important;
+    max-height: 76px;
+  }
+
+  #sidebar > div:first-child {
+    min-height: 66px;
+    padding: 12px 14px;
+  }
+
+  #sidebar > div:nth-child(2) {
+    padding: 10px 12px;
+  }
+
+  #markerList {
+    min-height: 0;
+    overscroll-behavior: contain;
+    padding: 10px 12px;
+  }
+
+  #sidebar > div:last-child {
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  #sidebar.mobile-collapsed > div:not(:first-child) {
+    display: none !important;
+  }
+
+  .mobile-panel-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  main.relative {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100dvh;
+  }
+
+  #map {
+    width: 100%;
+    height: 100% !important;
+  }
+
+  #geoSearchForm {
+    border-radius: 14px;
+  }
+
+  #geoSearchInput {
+    min-width: 0;
+    font-size: 14px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  #geoSearchBtn {
+    min-height: 38px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  main > div.absolute.top-3 {
+    top: max(12px, env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+  }
+
+  main > div.absolute.bottom-6 {
+    bottom: calc(48dvh + 14px + env(safe-area-inset-bottom));
+    right: 12px;
+  }
+
+  #sidebar.mobile-collapsed ~ main > div.absolute.bottom-6 {
+    bottom: 96px;
+  }
+
+  #markerModal {
+    align-items: flex-end;
+    padding: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+
+  #markerModal > div {
+    max-height: 90dvh;
+    border-radius: 20px;
+  }
+
+  #markerForm {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  #categorySelector {
+    gap: 6px;
+  }
+
+  #categorySelector label > div {
+    padding: 8px 4px;
+  }
+
+  #toast {
+    top: max(12px, env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: center;
+  }
+
+  #toastContent {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  #sidebar > div:first-child {
+    gap: 8px;
+  }
+  #sidebar > div:first-child p {
+    font-size: 10px;
+  }
+  #markerCountBadge {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+  #mobilePanelToggle {
+    padding: 7px 9px;
+    font-size: 10px;
+  }
+  #categorySelector label > div span:last-child {
+    font-size: 10px;
+  }
+}
